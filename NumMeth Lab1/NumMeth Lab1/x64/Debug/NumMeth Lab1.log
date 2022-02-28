@@ -1,0 +1,14 @@
+﻿  NumMeth Lab1.cpp
+C:\Users\Igor\source\repos\NumMeth Lab1\NumMeth Lab1\NumMeth Lab1.cpp(168,1): warning C4267: инициализация: преобразование из "size_t" в "long"; возможна потеря данных
+C:\Users\Igor\source\repos\NumMeth Lab1\NumMeth Lab1\NumMeth Lab1.cpp(139): message : во время компиляции функции-члена класс шаблон "std::vector<T,std::allocator<T>> Matrix<T>::Solve(const std::vector<T,std::allocator<T>> &)"
+          with
+          [
+              T=double
+          ]
+C:\Users\Igor\source\repos\NumMeth Lab1\NumMeth Lab1\NumMeth Lab1.cpp(310): message : выполняется компиляция ссылки на экземпляр шаблон функции "std::vector<T,std::allocator<T>> Matrix<T>::Solve(const std::vector<T,std::allocator<T>> &)"
+          with
+          [
+              T=double
+          ]
+C:\Users\Igor\source\repos\NumMeth Lab1\NumMeth Lab1\NumMeth Lab1.cpp(288): message : выполняется компиляция ссылки на экземпляр класс шаблон функции "Matrix<double>"
+  NumMeth Lab1.vcxproj -> C:\Users\Igor\source\repos\NumMeth Lab1\x64\Debug\NumMeth Lab1.exe
