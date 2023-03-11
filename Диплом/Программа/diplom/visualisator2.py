@@ -7,8 +7,6 @@ import math
 file = open("out.txt", "r")
 
 result1 = []
-result2 = []
-
 
 number_of_strings = file.readline()
 h1, tau1, L1 = float(file.readline()), float(file.readline()), float(file.readline())
@@ -19,33 +17,11 @@ for i in range(int(number_of_strings)):
 
     result1.append([float(num) for num in a])
 
-number_of_strings = file.readline()
-h2, tau2, L2 = float(file.readline()), float(file.readline()), float(file.readline())
-
-for i in range(int(number_of_strings)):
-    s = file.readline()
-    a = s[:-1].strip().split(" ")
-
-    result2.append([float(num) for num in a])
-
 file.close()
 
-# h, tau = [0.001, 0.001], 0.001
-
-# L = -0.1
-
-sig2 = lambda t : 4 * 0.005 * t
-
-def decision(x, t):
-    return 0.5 * 2.5 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (100.0 * (np.abs(x) < np.array([h1] * len(x))) )
-
 decision = lambda x,t : (x**2) * (t**2)
-# print(decision(0, tau2))
-# decision = None
 
 def draw(res, rows, decision = None):
-    # if res is not list:
-    #     res = [res]
 
     colums = 4
     all_count = colums * rows
@@ -55,30 +31,43 @@ def draw(res, rows, decision = None):
 
     X_decision = np.linspace(L1, L1 + h1 * len(res[0][0]), 200)
     X1 = np.array([L1 + h1*i for i in range(len(res[0][0]))])
-    X2 = np.array([L2 + h2*i for i in range(len(res[1][0]))])
     
     for kk in range(0, all_count):
 
-        # TIME1 = np.array([tau1*kk*step for i in range(len(res[0][0]))])
-        # TIME2 = np.array([tau2*kk*step for i in range(len(res[1][0]))])
         TIME_decision = np.array([tau1*kk*step] * len(X_decision))
 
         if not decision == None:
             ax[kk // colums, kk % colums].plot(X_decision, decision(X_decision, TIME_decision))
-        # for solution in range(len(res)):
+
         ax[kk // colums, kk % colums].plot(X1, res[0][kk*step], '.-', linewidth = 1)
-        ax[kk // colums, kk % colums].plot(X2, res[1][kk*step], '.-', linewidth = 1)
         ax[kk // colums, kk % colums].set_title(f"{kk*step} (t = {tau1*kk*step})")
 
     plt.show()
 
-def delta(res):
+
+def plot3D(res, decision, vmax = None):
+
+    XX = np.linspace(L1, L1 + h1 * len(res[0]), len(res[0]))
+    TT = np.linspace(0.0, tau1 * len(res), len(res))
+    XX, TT = np.meshgrid(XX, TT)
+    ZZ = decision(XX, TT)
     
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-
-    ax.matshow(np.abs(np.array(res[0]) - np.array(res[1])), aspect = 'auto')
-
+    fig = plt.figure(figsize=(16,8))
+    ax1 = fig.add_subplot(2, 4, 1, projection = "3d")
+    ax2 = fig.add_subplot(2, 4, 2, projection = "3d")
+    ax3 = fig.add_subplot(2, 4, (3,4))
+    
+    ax1.plot_surface(XX, TT, ZZ, cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    ax1.view_init(40, -60)
+    
+    ax2.plot_surface(XX, TT, np.array(res), cmap='viridis', linewidth=0, antialiased=False)
+    ax2.view_init(40, -60)
+    
+    cf = ax3.contourf(XX, TT, np.abs(ZZ - np.array(res)), 200, cmap=cm.coolwarm, vmax = vmax)
+    fig.colorbar(cf)
+    
     plt.show()
 
-draw([result1, result2], 6, decision)
-# delta([result1, result2])
+# draw([result1], 6, decision)
+
+plot3D(result1, decision)

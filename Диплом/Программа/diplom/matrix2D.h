@@ -130,9 +130,9 @@ struct Matrix {
             }
         }
 
-        /*std::cout << P << std::endl;
-        std::cout << L << std::endl;
-        std::cout << U << std::endl;*/
+        // std::cout << P << std::endl;
+        // std::cout << L << std::endl;
+        // std::cout << U << std::endl << std::endl;
 
         return std::vector<Matrix>({ P, L, U });
     }
@@ -289,14 +289,15 @@ struct Matrix {
         return matrix[i];
     }
 
+    friend std::ostream& operator<< (std::ostream& out, const Matrix& m) {
+        for (ull i = 0; i < m.size(); i++) {
+            for (ull j = 0; j < m.size(); j++) {
+                out << m[i][j] << ' ';
+            }
+            out << std::endl;
+        }
+        return out;
+    }
+
 };
 
-std::ostream& operator<< (std::ostream& out, const Matrix& m) {
-    for (ull i = 0; i < m.size(); i++) {
-        for (ull j = 0; j < m.size(); j++) {
-            out << m[i][j] << ' ';
-        }
-        out << std::endl;
-    }
-    return out;
-}

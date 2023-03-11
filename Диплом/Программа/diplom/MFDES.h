@@ -20,13 +20,14 @@ class MFDES {
 
 public: 
 
-    MFDES(Problem _p) : p(_p) {}
+    MFDES(const Problem& _p) : p(_p) {}
 
     std::vector<std::vector<double>> solve() {
 
         std::vector<std::vector<double>> result(p.k + 1, std::vector<double>(p.n + 1, 0.0));
 
         for (ull i = 0; i <= p.n; i++) {
+            // print(x_i(i));
             result[0][i] = p.psi(x_i(i));
         }
 
@@ -54,36 +55,47 @@ public:
                     } else if (i > j + 1) {
                         A[i][j] = a(x_i(i), t_k(t)) * g(p.alpha, i - j + 1);
                     } else if (i == j + 1) {
-                        A[i][j] = a(x_i(i), t_k(t)) * g(p.alpha, 2) + b(x_i(i), t_k(t));
+                        A[i][j] = a(x_i(i), t_k(t)) * g(p.alpha, 2) + b(x_i(i), t_k(t)) - c(x_i(i), t_k(t));
                     } else {
-                        A[i][j] = a(x_i(i), t_k(t)) + b(x_i(i), t_k(t)) * g(p.alpha, 2);
+                        A[i][j] = a(x_i(i), t_k(t)) + b(x_i(i), t_k(t)) * g(p.alpha, 2) + c(x_i(i), t_k(t));
                     } 
                 }
             }
 
             // borders
-            d[0] = p.phiL(t_k(t));
-            d[p.n] = p.phiR(t_k(t));
-            for (ull i = 0; i <= p.n; i++) {
-                A[0][i] = (i == 0 ? 1.0 : 0.0);
-                A[p.n][i] = (i == p.n ? 1.0 : 0.0);
+            if (p.borders) {
+                d[0] = p.phiL(t_k(t));
+                d[p.n] = p.phiR(t_k(t));
+                for (ull i = 0; i <= p.n; i++) {
+                    A[0][i] = (i == 0 ? 1.0 : 0.0);
+                    A[p.n][i] = (i == p.n ? 1.0 : 0.0);
+                }
             }
+
+            // std::cout << A << std::endl;
 
             // solve system
             auto r = A.Solve(d);
+
+            // print(r);
 
             for (ull i = 0; i < r.size(); i++) {
                 result[t][i] = r[i];
             }
 
-            result[t][0] = p.phiL(t_k(t));
-            result[t][r.size() - 1] = p.phiR(t_k(t));
+            if (p.borders) {
+                result[t][0] = p.phiL(t_k(t));
+                result[t][r.size() - 1] = p.phiR(t_k(t));
+            }
         }
 
         return result;
     }
 
     inline double g(double a, ull j) {
+        if (std::abs(a) - (ull)std::abs(a) < 0.0001 && j >= a + 1) {
+            return 0.0;
+        }
         return (j % 2 == 0 ? 1 : -1) / (a + 1) / BETA((double)j + 1.0, a - (double)j + 1.0);
     }
 
@@ -101,6 +113,10 @@ public:
 
     inline double b(double x, double t) {
         return (1.0 - p.beta) * (p.D(x, t) / 2.0) * (std::pow(p.tau, p.gamma) / std::pow(p.h, p.alpha));
+    }
+
+    inline double c(double x, double t) {
+        return p.V(x, t) * std::pow(p.tau, p.gamma) / 2 / p.h;
     }
 
 };
