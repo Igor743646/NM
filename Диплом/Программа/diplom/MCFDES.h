@@ -57,43 +57,6 @@ class MCFDES {
         print(probabilities);
     }
 
-    double _make_participle_count_in_cage(std::vector<ull>& participle_count_in_cage, ull count) {
-        double square = 0.0;
-
-        for (ull i = 0; i <= p.n; i++) {
-            square += p.psi(x_i(i) - p.h / 2.0) + p.psi(x_i(i) + p.h / 2.0);
-        }
-
-        // print(square);
-
-        for (ull i = 0; i <= p.n; i++) {
-            participle_count_in_cage[i] = (ull)std::ceil((double)count * (p.psi(x_i(i) - p.h / 2.0) + p.psi(x_i(i) + p.h / 2.0)) / square);
-        }
-
-        // print(participle_count_in_cage);
-
-        return square;
-    }
-
-    long long _start_x_position(std::vector<ull>& participle_count_in_cage) {
-        long long result = 0;
-
-        while (0 == participle_count_in_cage[result]) {
-            result++;
-        }
-
-        if (result < participle_count_in_cage.size()) {
-            participle_count_in_cage[result]--; 
-        } else {
-            result--;
-        }
-            
-
-        // print(participle_count_in_cage);
-
-        return result;
-    }
-
 public: 
 
     MCFDES(const Problem& _p) : p(_p) {}

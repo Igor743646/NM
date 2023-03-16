@@ -7,6 +7,8 @@ import math
 file = open("out.txt", "r")
 
 result1 = []
+result2 = []
+
 
 number_of_strings = file.readline()
 h1, tau1, L1 = float(file.readline()), float(file.readline()), float(file.readline())
@@ -17,9 +19,29 @@ for i in range(int(number_of_strings)):
 
     result1.append([float(num) for num in a])
 
+number_of_strings = file.readline()
+h2, tau2, L2 = float(file.readline()), float(file.readline()), float(file.readline())
+
+for i in range(int(number_of_strings)):
+    s = file.readline()
+    a = s[:-1].strip().split(" ")
+
+    result2.append([float(num) for num in a])
+
 file.close()
 
 decision = lambda x,t : (x**2) * (t**2)
+
+
+
+sig2 = lambda t : 4 * 0.0005 * t
+
+def decision(x, t):
+    res = 0.1 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) 
+    # res[0] = 10.0 * (np.abs(x[0]) < np.array([h1] * len(x[0])))
+    return res
+
+# decision = lambda x,t : (x**2) * np.exp(2*t)
 
 def draw(res, rows, decision = None):
 
@@ -42,21 +64,21 @@ def draw(res, rows, decision = None):
         ax[kk // colums, kk % colums].plot(X1, res[0][kk*step], '.-', linewidth = 1)
         ax[kk // colums, kk % colums].set_title(f"{kk*step} (t = {tau1*kk*step})")
 
-    plt.show()
 
 
 def plot3D(res, decision, vmax = None):
 
     XX = np.linspace(L1, L1 + h1 * len(res[0]), len(res[0]))
-    TT = np.linspace(0.0, tau1 * len(res), len(res))
+    TT = np.linspace(0, tau1 * len(res), len(res))
     XX, TT = np.meshgrid(XX, TT)
     ZZ = decision(XX, TT)
     
     fig = plt.figure(figsize=(16,8))
-    ax1 = fig.add_subplot(2, 4, 1, projection = "3d")
-    ax2 = fig.add_subplot(2, 4, 2, projection = "3d")
+    ax1 = fig.add_subplot(2, 4, (1, 5), projection = "3d")
+    ax2 = fig.add_subplot(2, 4, (2, 6), projection = "3d")
     ax3 = fig.add_subplot(2, 4, (3,4))
-    
+    ax4 = fig.add_subplot(2, 4, (7,8))
+
     ax1.plot_surface(XX, TT, ZZ, cmap=cm.coolwarm, linewidth=0, antialiased=False)
     ax1.view_init(40, -60)
     
@@ -65,9 +87,15 @@ def plot3D(res, decision, vmax = None):
     
     cf = ax3.contourf(XX, TT, np.abs(ZZ - np.array(res)), 200, cmap=cm.coolwarm, vmax = vmax)
     fig.colorbar(cf)
+
+    ax4.plot(TT, np.max(np.abs(ZZ - np.array(res)), 1) )
+
     
-    plt.show()
+    
 
 # draw([result1], 6, decision)
 
 plot3D(result1, decision)
+plot3D(result2, decision)
+
+plt.show()

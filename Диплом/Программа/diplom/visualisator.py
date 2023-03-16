@@ -34,12 +34,12 @@ file.close()
 
 # L = -0.1
 
-sig2 = lambda t : 4 * 0.005 * t
+sig2 = lambda t : 4 * 0.0005 * t
 
 def decision(x, t):
-    return 0.5 * 2.5 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (100.0 * (np.abs(x) < np.array([h1] * len(x))) )
+    return 0.1 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (10.0 * (np.abs(x) < np.array([h1] * len(x))) )
 
-decision = lambda x,t : (x**2) * (t**2)
+decision = lambda x,t : (x**2) * np.exp(2*t)
 # print(decision(0, tau2))
 # decision = None
 
@@ -70,15 +70,7 @@ def draw(res, rows, decision = None):
         ax[kk // colums, kk % colums].plot(X2, res[1][kk*step], '.-', linewidth = 1)
         ax[kk // colums, kk % colums].set_title(f"{kk*step} (t = {tau1*kk*step})")
 
-    plt.show()
+# draw([result1, result2], int(number_of_strings) // 4, decision)
+draw([result1, result2], 5, decision)
 
-def delta(res):
-    
-    fig, ax = plt.subplots(1, 1, figsize=(8, 8))
-
-    ax.matshow(np.abs(np.array(res[0]) - np.array(res[1])), aspect = 'auto')
-
-    plt.show()
-
-draw([result1, result2], 6, decision)
-# delta([result1, result2])
+plt.show()

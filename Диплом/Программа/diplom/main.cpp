@@ -12,30 +12,64 @@ using ull = unsigned long long;
 
 int main() {
 
-    // std::cout << std::fixed;
-
-    // std::cout.precision(20);
-
+    /* u(x, t) = x^2 * t^2 */
     // Problem p1(
-    //     0.0, 1.0, 1.0, 1.7, 0.7, 0.05, 0.01, 0.5,
-    //     [](double x, double t){ return GAMMA(3.0 - 1.7) / GAMMA(3.0) * (std::pow(x, 1.7)); },
+    //     0.0, 1.0, 0.01, 1.7, 0.7, 0.05, 0.0001, 0.0,
+    //     [](double x, double t){ return GAMMA(3.0 - 1.7) / GAMMA(3.0 - 0.7) ; },
     //     [](double x, double t){ return 0.0; },
     //     [](double x){ return 0.0; },
-    //     [](double x, double t){ return GAMMA(3.0) / GAMMA(3.0 - 0.7) * (std::pow(t, 2.0 - 0.7) * std::pow(x, 2.0)) - std::pow(x*t, 2.0); },
+    //     [](double x, double t){ return GAMMA(3.0) / GAMMA(3.0 - 0.7) * (std::pow(t, 2.0 - 0.7) * std::pow(x, 2.0)) - std::pow(x, 2.0 - 1.7) * std::pow(t, 2.0); },
     //     [](double t){ return 0.0; },
     //     [](double t){ return std::pow(t, 2.0); }
     // );
 
+    /* u(x, t) = exp(2t) * x^2 */
+    // Problem p1(
+    //     0, 10.0, 0.2, 1.8, 0.9, 0.2, 0.01, 1.0,
+    //     [](double x, double t){ return std::pow(2.0, 0.9) * GAMMA(3.0 - 1.8) / GAMMA(3.0); },                                // D
+    //     [](double x, double t){ return 0.0; },                                 // V
+    //     [](double x){ return std::pow(x, 2.0); },     // psi(x)
+    //     [](double x, double t){ return std::pow(2.0, 0.9) * std::exp(2.0 * t) * (std::pow(x, 2.0) - std::pow(x, 0.2)); },                                  // f(x, t)
+    //     [](double t){ return 0.0; },                                            // phiL(t)
+    //     [](double t){ return std::exp(2.0 * t) * 100.0; }                                             // phiR(t)
+    // );
+
+
+
+    /* u(x, t) = ??? */ // alpha = 2.0, gamma = 1.0
     Problem p1(
-        -0.1, 0.1, 0.5, 1.7, 0.9, 0.01, 0.01, 0.0,
-        [](double x, double t){ return 0.005; },                                // D
-        [](double x, double t){ return 0.05; },                                 // V
-        [](double x){ return (-0.005 <= x && x < 0.00499) ? 100.0 : 0.0; },     // psi(x)
-        // [](double x){ return -(x-1)*(x+1); },
-        [](double x, double t){ return std::pow(x, 2.0) * t; },                                  // f(x, t)
-        [](double t){ return t; },                                            // phiL(t)
-        [](double t){ return t; }                                             // phiR(t)
+        -0.1, 0.1, 5.0, 2.0, 1.0, 0.01, 0.05, 0.0,
+        [](double x, double t){ return 0.0005; },                                // D
+        [](double x, double t){ return 0.0; },                                 // V
+        [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+        [](double x, double t){ return 0.0; },                                  // f(x, t)
+        [](double t){ return 0.0; },                                            // phiL(t)
+        [](double t){ return 0.0; }                                             // phiR(t)
     );
+
+    /* u(x, t) = ??? */ // alpha = 1.8, gamma = 1.0
+    // Problem p1(
+    //     -0.1, 0.1, 5.0, 1.8, 1.0, 0.01, 0.05, 0.0,
+    //     [](double x, double t){ return 0.0005; },                                // D
+    //     [](double x, double t){ return 0.0; },                                 // V
+    //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+    //     [](double x, double t){ return 0.0; }                                  // f(x, t)
+    //     [](double t){ return 0.0; },                                            // phiL(t)
+    //     [](double t){ return 0.0; }                                             // phiR(t)
+    // );
+
+    /* u(x, t) = ??? */ // alpha = 2.0, gamma = 0.9
+    // Problem p1(
+    //     -0.1, 0.1, 5.0, 2.0, 0.9, 0.01, 0.05, 0.0,
+    //     [](double x, double t){ return 0.0005; },                                // D
+    //     [](double x, double t){ return 0.0; },                                 // V
+    //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+    //     [](double x, double t){ return 0.0; },                                  // f(x, t)
+    //     [](double t){ return 0.0; },                                            // phiL(t)
+    //     [](double t){ return 0.0; }                                             // phiR(t)
+    // );
+
+
 
     // std::cout << p2.D(0, 0) * std::pow(p2.tau, p2.gamma) / std::pow(p2.h, p2.alpha) << " " << p2.gamma / p2.alpha << std::endl;
 
@@ -77,14 +111,6 @@ int main() {
         }
         file << std::endl;
     }
-
-    // file << p1 << std::endl;
-    // for (ull t = 0; t < result1.size(); t++) {
-    //     for (ull i = 0; i < result1[t].size(); i++) {
-    //         file << result1[t][i] << " ";
-    //     }
-    //     file << std::endl;
-    // }
 
     file.close();
     
