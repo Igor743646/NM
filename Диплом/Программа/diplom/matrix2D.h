@@ -55,7 +55,7 @@ struct Matrix {
     }
 
     void SwapLines(ull i, ull j) {
-        if (i >= n || i < 0 || j < 0 || j >= n) {
+        if (i >= n || j >= n) {
             throw "Error: bad index in SwapLines\n";
         }
 
@@ -63,7 +63,7 @@ struct Matrix {
     }
 
     void SwapColumns(ull i, ull j) {
-        if (i >= n || i < 0 || j < 0 || j >= n) {
+        if (i >= n || j >= n) {
             throw "Error: bad index in SwapColumns\n";
         }
 

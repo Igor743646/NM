@@ -41,7 +41,9 @@ def decision(x, t):
     # res[0] = 10.0 * (np.abs(x[0]) < np.array([h1] * len(x[0])))
     return res
 
-# decision = lambda x,t : (x**2) * np.exp(2*t)
+# decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
+# decision = lambda x,t : (x * x) * np.exp(2*t)
+# decision = lambda x,t : (x * x) * t * t
 
 def draw(res, rows, decision = None):
 

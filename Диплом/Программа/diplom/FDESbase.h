@@ -1,11 +1,14 @@
 #pragma once
 #include <cmath>
+#include "utils.h"
 
 namespace {
     using ull = unsigned long long;
 }
 
-struct Problem {
+class FDESbase {
+
+protected:
 
     double L, R;
     double T;
@@ -23,7 +26,11 @@ struct Problem {
     ull n, k;
     bool borders;
 
-    Problem(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
+public:
+
+    std::vector<std::vector<double>> result;
+
+    FDESbase(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
         std::function<double(double, double)> _D, std::function<double(double, double)> _V, std::function<double(double)> _psi,
         std::function<double(double, double)> _f, std::function<double(double)> _phiL,
         std::function<double(double)> _phiR) 
@@ -37,18 +44,13 @@ struct Problem {
         f = _f;
         phiL = _phiL;
         phiR = _phiR;
-
-        if (D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) > gamma / alpha) {
-            std::cout << "May be problem with condition\n";
-            std::cout << D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) << " " << gamma / alpha << std::endl;
-        }
-
         n = (ull)((R - L) / h);
         k = (ull)(T / tau);
         borders = true;
+        result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
     }
 
-    Problem(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
+    FDESbase(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
         std::function<double(double, double)> _D, std::function<double(double, double)> _V, std::function<double(double)> _psi,
         std::function<double(double, double)> _f) 
     {
@@ -61,18 +63,13 @@ struct Problem {
         f = _f;
         phiL = [](double t){ return 0.0; };
         phiR = [](double t){ return 0.0; };
-
-        if (D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) > gamma / alpha) {
-            std::cout << "May be problem with condition\n";
-            std::cout << D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) << " " << gamma / alpha << std::endl;
-        }
-
         n = (ull)((R - L) / h);
         k = (ull)(T / tau);
         borders = false;
+        result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
     }
 
-    Problem(const Problem& p) 
+    FDESbase(const FDESbase& p) 
     {
         L = p.L; R = p.R; T = p.T;
         alpha = p.alpha; gamma = p.gamma;
@@ -83,19 +80,67 @@ struct Problem {
         f = p.f;
         phiL = p.phiL;
         phiR = p.phiR;
-
-        if (D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) > gamma / alpha) {
-            std::cout << "May be problem with condition\n";
-            std::cout << D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) << " " << gamma / alpha << std::endl;
-        }
-
         n = p.n;
         k = p.k;
         borders = p.borders;
+        result = p.result;
     }
 
-    friend std::ostream& operator<<(std::ostream& out, const Problem& p) {
-        return out << p.k + 1 << std::endl << p.h << std::endl << p.tau << std::endl << p.L;
+    void Info() {
+
+        print("Info:");
+        print("\tx : [", L, "; ", R, "], t : [", 0, "; ", T, "]");
+        print("\th = ", h, "; tau = ", tau);
+        print("\tN = ", n);
+        print("\tT = ", k);
+
+        print("\tD * (tau^gamma) / (h^alpha) = ", D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha));
+        print("\tgamma / alpha = ", gamma / alpha);
+
+        if (D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) > gamma / alpha) {
+            print("May be problem with condition");
+            print(D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha), " ", gamma / alpha);
+        }
+        print();
+    }
+
+    inline double g(double a, ull j) {
+        if (std::abs(a) - (ull)std::abs(a) < 0.000001 && j >= a + 1) {
+            return 0.0;
+        }
+        return (j % 2 == 0 ? 1 : -1) / (a + 1) / BETA((double)j + 1.0, a - (double)j + 1.0);
+    }
+
+    inline double x_i(ull i) {
+        return L + i * h;
+    }
+
+    inline double t_k(ull k) {
+        return k * tau;
+    }
+
+    inline double a(double x, double t) {
+        return (1.0 + beta) * (D(x, t) / 2.0) * (std::pow(tau, gamma) / std::pow(h, alpha));
+    }
+
+    inline double b(double x, double t) {
+        return (1.0 - beta) * (D(x, t) / 2.0) * (std::pow(tau, gamma) / std::pow(h, alpha));
+    }
+
+    inline double c(double x, double t) {
+        return V(x, t) * std::pow(tau, gamma) / 2 / h;
+    }
+
+    friend std::ostream& operator<<(std::ostream& out, const FDESbase& p) {
+        out << p.k + 1 << std::endl << p.h << std::endl << p.tau << std::endl << p.L << std::endl;
+        for (ull t = 0; t < p.result.size(); t++) {
+            for (ull i = 0; i < p.result[t].size(); i++) {
+                out << p.result[t][i] << " ";
+            }
+            if (t < p.result.size() - 1)
+                out << std::endl;
+        }
+        return out;
     }
 
 };

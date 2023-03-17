@@ -39,7 +39,9 @@ sig2 = lambda t : 4 * 0.0005 * t
 def decision(x, t):
     return 0.1 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (10.0 * (np.abs(x) < np.array([h1] * len(x))) )
 
-decision = lambda x,t : (x**2) * np.exp(2*t)
+# decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
+# decision = lambda x,t : (x * x) * t * t
+# decision = lambda x,t : (x * x) * np.exp(2*t)
 # print(decision(0, tau2))
 # decision = None
 
