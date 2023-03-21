@@ -17,6 +17,8 @@ FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma
     n = (ull)((R - L) / h);
     k = (ull)(T / tau);
     result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
+    memo_g_alpha[0] = 1.0;
+    memo_g_gamma[0] = 1.0;
 }
 
 FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
@@ -35,9 +37,11 @@ FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma
     n = (ull)((R - L) / h);
     k = (ull)(T / tau);
     result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
+    memo_g_alpha[0] = 1.0;
+    memo_g_gamma[0] = 1.0;
 }
 
-FDESbase::FDESbase(const FDESbase& p) 
+FDESbase::FDESbase(const FDESbase& p)
 {
     L = p.L; R = p.R; T = p.T;
     alpha = p.alpha; gamma = p.gamma;
@@ -51,6 +55,8 @@ FDESbase::FDESbase(const FDESbase& p)
     n = p.n;
     k = p.k;
     result = p.result;
+    memo_g_alpha[0] = 1.0;
+    memo_g_gamma[0] = 1.0;
 }
 
 void FDESbase::Info() {
@@ -66,16 +72,41 @@ void FDESbase::Info() {
     if (D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha) > gamma / alpha) {
         Output::print("May be problem with condition");
         Output::print(D(0, 0) * std::pow(tau, gamma) / std::pow(h, alpha), " ", gamma / alpha);
+        Output::print("You may make tau <= ", std::pow(gamma * std::pow(h, alpha) / alpha / D(0, 0), 1.0/gamma));
+        Output::print("Or make h >= ", std::pow(std::pow(tau, gamma) * alpha * D(0, 0) / gamma, 1.0/alpha));
+        throw "ERROR: Bad conditions\n";
     }
     
     Output::print("\n");
 }
 
 double FDESbase::g(double a, ull j) {
-    if (std::abs(a) - (ull)std::abs(a) < 0.000001 && j >= a + 1) {
-        return 0.0;
+
+    if (a != alpha && a != gamma) {
+        throw "ERROR: g function using memoization only for \"alpha\" and \"gamma\". If you need more use comments below\n";
+
+        /*
+            if (std::abs(a) - (ull)std::abs(a) < 0.000001 && j >= a + 1) {
+                return 0.0;
+            }
+            return (j % 2 == 0 ? 1 : -1) / (a + 1) / BETA((double)j + 1.0, a - (double)j + 1.0);
+        */
     }
-    return (j % 2 == 0 ? 1 : -1) / (a + 1) / BETA((double)j + 1.0, a - (double)j + 1.0);
+
+    if (a == alpha) {
+        if (memo_g_alpha.find(j) != memo_g_alpha.end()) {
+            return memo_g_alpha[j];
+        } else {
+            memo_g_alpha[j] = (j - 1.0 - alpha) / j * FDESbase::g(a, j - 1);
+            return memo_g_alpha[j];
+        }
+    } 
+    
+    if (memo_g_gamma.find(j) == memo_g_gamma.end()) {
+        memo_g_gamma[j] = (j - 1.0 - gamma) / j * FDESbase::g(a, j - 1);
+    }
+
+    return memo_g_gamma[j];
 }
 
 double FDESbase::x_i(ull i) {

@@ -7,8 +7,8 @@
 #endif
 
 #define DEFAULT_COUNT 1000
-#define TBLOCKS 64
-#define THREADS 64
+#define TBLOCKS 128
+#define THREADS 128
 
 MCFDES::MCFDES(const FDESbase& _p) : FDESbase(_p) {
     probabilities = _make_prob();

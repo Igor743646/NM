@@ -1,6 +1,7 @@
 #pragma once
 #include <cmath>
 #include <functional>
+#include <unordered_map>
 #include "utils.h"
 
 class FDESbase {
@@ -21,6 +22,9 @@ protected:
     std::function<double(double)> phiR;         // граничное условие u(R, t) = phiR(t)
 
     ull n, k;       // количество ячеек по x и t координатах соответственно
+
+    std::unordered_map<ull, double> memo_g_alpha;
+    std::unordered_map<ull, double> memo_g_gamma;
 
 public:
 

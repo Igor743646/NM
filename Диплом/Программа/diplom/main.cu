@@ -6,6 +6,14 @@
 #include <fstream>
 #include <chrono>
 
+bool ill(double x, double a, double b) { // include_line_left
+    return (a <= x && x < b) ? true : false;
+}
+
+bool ila(double x, double a, double b) { // include_line_all
+    return (a <= x && x <= b) ? true : false;
+}
+
 int main() {
 
     // std::cout << std::fixed;
@@ -36,15 +44,15 @@ int main() {
 
 
     /* u(x, t) = ??? */ // alpha = 2.0, gamma = 1.0
-    FDESbase p1(
-        -0.1, 0.1, 5.0, 2.0, 1.0, 0.01, 0.05, 0.0,
-        [](double x, double t){ return 0.0005; },                                // D
-        [](double x, double t){ return 0.0; },                                 // V
-        [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
-        [](double x, double t){ return 0.0; },                                  // f(x, t)
-        [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); },                                            // phiL(t)
-        [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); }                                             // phiR(t)
-    );
+    // FDESbase p1(
+    //     -0.1, 0.1, 5.0, 2.0, 1.0, 0.01, 0.05, 0.0,
+    //     [](double x, double t){ return 0.0005; },                                // D
+    //     [](double x, double t){ return 0.0; },                                 // V
+    //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+    //     [](double x, double t){ return 0.0; },                                  // f(x, t)
+    //     [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); },                                            // phiL(t)
+    //     [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); }                                             // phiR(t)
+    // );
 
     /* u(x, t) = ??? */ // alpha = 1.8, gamma = 1.0
     // FDESbase p1(
@@ -70,12 +78,12 @@ int main() {
 
     /* u(x, t) = exp(2t) * sin(x) */ // alpha = 1.7, gamma = 0.8
     // FDESbase p1(
-    //     -std::PI, std::PI, 0.001, 1.7, 0.8, 0.05, 0.0001, 0.0,
-    //     [](double x, double t){ return std::pow(2.0, 0.8) / 2.0 / std::cos((1.7 - 1.0) / 4.0 * std::PI); },                                // D
-    //     [](double x, double t){ return std::pow(2.0, 0.8) / 2.0 / std::cos((1.7 - 1.0) / 4.0 * std::PI); },                                // V
+    //     -std::PI, std::PI, 1.0, 1.7, 0.8, 0.2, 0.005, 0.0,
+    //     [](double x, double t){ return std::pow(2.0, 0.8); },                                // D
+    //     [](double x, double t){ return 1.0; },                                // V
     //     [](double x){ return std::sin(x); },     // psi(x)
     //     [](double x, double t){ return -2.0 * std::pow(2.0, 0.8) * std::exp(2.0 * t) * 
-    //                             std::sin((1.7 + 1.0) / 8.0 * std::PI) * std::cos(x + (1.7 + 1.0) / 8.0 * std::PI); },                      // f(x, t)
+    //                             std::sin(1.7 / 4.0 * std::PI) * std::cos(x + 1.7 / 4.0 * std::PI); },                      // f(x, t)
     //     [](double t){ return 0.0; },                                            // phiL(t)
     //     [](double t){ return 0.0; }                                             // phiR(t)
     // );
@@ -90,6 +98,17 @@ int main() {
     //     [](double t){ return t * t; },
     //     [](double t){ return t * t; }
     // );
+
+    /* u(x, t) = ??? */ // alpha = 1.7, gamma = 0.8
+    FDESbase p1(
+        0.0, 2.0, 1.0, 1.7, 0.8, 0.025, 0.005, 0.0,
+        [](double x, double t){ return 0.05; },                                // D
+        [](double x, double t){ return -1.0; },                                // V
+        [](double x){ return ill(x, 0.0, 1.0) ? 4.0 : (ila(x, 1.0, 2.0) ? 2.0 : 0.0); },     // psi(x)
+        [](double x, double t){ return 0.0; },                      // f(x, t)
+        [](double t){ return 1.0; },                                            // phiL(t)
+        [](double t){ return 1.0; }                                             // phiR(t)
+    );
 
     p1.Info();
 
@@ -107,7 +126,7 @@ int main() {
     std::cout << "MFDES (by matrix solver) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
 
     start_time = std::chrono::system_clock::now();
-    solution2.solve_GPU(10000);
+    solution2.solve_GPU(4000);
     end_time = std::chrono::system_clock::now();
 
     std::cout << "MCFDES (by Monte-Carlo algo) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;

@@ -44,6 +44,7 @@ def decision(x, t):
 # decision = lambda x,t : (x * x) * np.exp(2*t)
 # decision = lambda x,t : t * t
 # decision = None
+decision = lambda x, t: np.zeros_like(x)
 
 def draw(res, rows, decision = None):
     # if res is not list:
