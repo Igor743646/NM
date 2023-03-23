@@ -21,13 +21,14 @@ int main() {
 
     /* u(x, t) = x^2 * t^2 */
     // FDESbase p1(
-    //     0.0, 1.0, 0.01, 1.7, 0.7, 0.05, 0.0001, 1.0,
+    //     1.0, 2.0, 1.0, 1.7, 0.7, 0.1, 0.0005, 1.0,
     //     [](double x, double t){ return GAMMA(3.0 - 1.7) / GAMMA(3.0 - 0.7) ; },
     //     [](double x, double t){ return 0.0; },
     //     [](double x){ return 0.0; },
     //     [](double x, double t){ return GAMMA(3.0) / GAMMA(3.0 - 0.7) * (std::pow(t, 2.0 - 0.7) * std::pow(x, 2.0)) - std::pow(x, 2.0 - 1.7) * std::pow(t, 2.0); },
-    //     [](double t){ return 0.0; },
-    //     [](double t){ return std::pow(t, 2.0); }
+    //     [](double t){ return 0.5 * std::pow(t, 2.0); },
+    //     [](double t){ return 4.0 * std::pow(t, 2.0); },
+    //     0.5, -0.5, 0.5, 0.5
     // );
 
     /* u(x, t) = exp(2t) * x^2 */
@@ -103,11 +104,12 @@ int main() {
     FDESbase p1(
         0.0, 2.0, 1.0, 1.7, 0.8, 0.025, 0.005, 0.0,
         [](double x, double t){ return 0.05; },                                // D
-        [](double x, double t){ return -1.0; },                                // V
+        [](double x, double t){ return -0.2; },                                // V
         [](double x){ return ill(x, 0.0, 1.0) ? 4.0 : (ila(x, 1.0, 2.0) ? 2.0 : 0.0); },     // psi(x)
-        [](double x, double t){ return 0.0; },                      // f(x, t)
+        [](double x, double t){ return 10.0*std::sin(x+4.0 * t); },                      // f(x, t)
         [](double t){ return 1.0; },                                            // phiL(t)
-        [](double t){ return 1.0; }                                             // phiR(t)
+        [](double t){ return 1.0; },                                            // phiR(t)
+        0.0, 1.0, 0.0, 1.0
     );
 
     p1.Info();
@@ -126,7 +128,7 @@ int main() {
     std::cout << "MFDES (by matrix solver) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
 
     start_time = std::chrono::system_clock::now();
-    solution2.solve_GPU(4000);
+    solution2.solve_GPU(2000);
     end_time = std::chrono::system_clock::now();
 
     std::cout << "MCFDES (by Monte-Carlo algo) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;

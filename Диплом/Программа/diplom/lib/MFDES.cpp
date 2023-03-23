@@ -15,12 +15,16 @@ void MFDES::solve() {
         // create d-vector
         std::vector<double> d(n + 1, 0.0);
 
-        for (ull i = 0; i <= n; i++) {
+        for (ull i = 1; i < n; i++) {
             for (ull j = 1; j <= t; j++) {
                 d[i] += g(gamma, j) * result[t-j][i];
             }
             d[i] -= std::pow(tau, gamma) * f(x_i(i), t_k(t));
         }
+
+        //// borders
+        d[0] = phiL(t_k(t));
+        d[n] = phiR(t_k(t));
 
         // create matrix A
         for (ull i = 0; i <= n; i++) {
@@ -39,13 +43,18 @@ void MFDES::solve() {
             }
         }
 
-        // borders
-        d[0] = phiL(t_k(t));
-        d[n] = phiR(t_k(t));
+        //// borders 3Т2П
         for (ull i = 0; i <= n; i++) {
-            A[0][i] = (i == 0 ? 1.0 : 0.0);
-            A[n][i] = (i == n ? 1.0 : 0.0);
+            A[0][i] = 0.0;
+            A[n][i] = 0.0;
         }
+
+        A[0][0] = beta_l - 1.5 * alpha_l / h;
+        A[0][1] = 2.0 * alpha_l / h;
+        A[0][2] = -0.5 * alpha_l / h;
+        A[n][n-2] = 0.5 * alpha_r / h;
+        A[n][n-1] = -2.0 * alpha_r / h;
+        A[n][n] = beta_r + 1.5 * alpha_r / h;
 
         // solve system
         auto r = A.Solve(d);
@@ -53,8 +62,5 @@ void MFDES::solve() {
         for (ull i = 0; i < r.size(); i++) {
             result[t][i] = r[i];
         }
-
-        result[t][0] = phiL(t_k(t));
-        result[t][r.size() - 1] = phiR(t_k(t));
     }
 }

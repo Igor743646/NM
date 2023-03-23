@@ -1,4 +1,5 @@
 #include "MCFDES.h"
+#include "utils.h"
 
 #ifdef GPU_ENABLE
 
@@ -12,6 +13,16 @@
 
 MCFDES::MCFDES(const FDESbase& _p) : FDESbase(_p) {
     probabilities = _make_prob();
+
+    if (alpha_l * beta_l >= 0) {
+        Output::print("ERROR: May be problem with conditions: alpha_l * beta_l = ", alpha_l * beta_l , ">= 0");
+        // throw "ERROR: wrong border condition (L)";
+    }
+
+    if (alpha_r * beta_r <= 0) {
+        Output::print("ERROR: May be problem with conditions: alpha_r * beta_r = ", alpha_r * beta_r , "<= 0");
+        // throw "ERROR: wrong border condition (R)";
+    }
 }
 
 void MCFDES::solve(ull count = DEFAULT_COUNT) {
@@ -91,17 +102,12 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
 
     _make_prefsum_prob(prefsum_prob);
 
-    /* Учёт начального и граничных условий */
+    /* Учёт начального условия */
     for (ull i = 0; i <= n; i++) {
         result[0][i] = psi(x_i(i));
     }
 
-    for (ull j = 1; j <= k; j++) {
-        result[j][0] = phiL(t_k(j));
-        result[j][n] = phiR(t_k(j));
-    }
-
-    ull grid_size = (n - 1) * k;
+    ull grid_size = (n + 1) * k;
 
     /* Предпосчет граничных условий */
     double* borders_cpu = new double[n + 1 + k + k];
@@ -125,7 +131,7 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
     double* source_cpu = new double[grid_size];
 
     for (ull i = 0; i < grid_size; i++) {
-        source_cpu[i] = f(x_i((i % (n - 1)) + 1), t_k((i / (n - 1)) + 1));
+        source_cpu[i] = f(x_i(i % (n + 1)), t_k((i / (n + 1)) + 1));
     }
 
     double* source_gpu;
@@ -148,7 +154,8 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
     setup_kernel<<<TBLOCKS, THREADS>>>(dev_states, grid_size);
     CSC(cudaGetLastError());
 
-    solve_kernel<<<TBLOCKS, THREADS>>>(dev_states, result_gpu, prefsum_prob_gpu, n, k, count, L, h, tau, gamma, borders_gpu, source_gpu);
+    solve_kernel<<<TBLOCKS, THREADS>>>(dev_states, result_gpu, prefsum_prob_gpu, n, k, count, L, h, tau, 
+                                        gamma, borders_gpu, source_gpu, alpha_l, beta_l, alpha_r, beta_r);
     CSC(cudaGetLastError());
 
     double* result_cpu = new double[grid_size];
@@ -156,7 +163,7 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
 
 
     for (ull i = 0; i < grid_size; i++) {
-        result[(i / (n - 1)) + 1][(i % (n - 1)) + 1] = result_cpu[i]; 
+        result[(i / (n + 1)) + 1][i % (n + 1)] = result_cpu[i]; 
     }
     
     delete[] result_cpu;

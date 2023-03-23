@@ -43,9 +43,9 @@ def decision(x, t):
 
 # decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
 # decision = lambda x,t : (x * x) * np.exp(2*t)
-# decision = lambda x,t : (x * x) * t * t
+decision = lambda x,t : (x * x) * t * t
 # decision = lambda x,t : t * t
-decision = lambda x, t: np.zeros_like(x)
+# decision = lambda x, t: np.zeros_like(x)
 
 def draw(res, rows, decision = None):
 
@@ -94,12 +94,24 @@ def plot3D(res, decision, vmax = None):
 
     ax4.plot(TT, np.max(np.abs(ZZ - np.array(res)), 1) )
 
+def delta12(res1, res2, f):
+    XX = np.linspace(L1, L1 + h1 * len(res1[0]), len(res1[0]))
+    TT = np.linspace(0, tau1 * len(res1), len(res1))
+    XX, TT = np.meshgrid(XX, TT)
     
+    fig = plt.figure(figsize=(16,8))
+    ax1 = fig.add_subplot(1, 1, 1, projection = "3d")
+
+    ax1.plot_surface(XX, TT, np.array(res1) - np.array(res2) + f(XX, TT) * np.power(TT, 0.8), cmap=cm.coolwarm, linewidth=0, antialiased=False)
+    # ax1.plot_surface(XX, TT, f(XX, TT))
+    ax1.view_init(40, -60)
     
 
 # draw([result1], 6, decision)
-
-plot3D(result1, decision)
-plot3D(result2, decision)
+def f(x, t):
+    return 10.0 * np.sin(x+4.0*t) / 10.0
+# plot3D(result1, decision)
+# plot3D(result2, decision)
+delta12(result1, result2, f)
 
 plt.show()

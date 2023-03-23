@@ -1,19 +1,18 @@
 #include "FDESbase.h"
 
 FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
-    std::function<double(double, double)> _D, std::function<double(double, double)> _V, std::function<double(double)> _psi,
-    std::function<double(double, double)> _f, std::function<double(double)> _phiL,
-    std::function<double(double)> _phiR) 
+    std::function<double(double, double)> _D, 
+    std::function<double(double, double)> _V, 
+    std::function<double(double)> _psi,
+    std::function<double(double, double)> _f, 
+    std::function<double(double)> _phiL,
+    std::function<double(double)> _phiR,
+    double _alpha_l, double _beta_l,
+    double _alpha_r, double _beta_r) 
+    : L(_L), R(_R), T(_T), alpha(_alpha), gamma(_gamma), h(_h), tau(_tau), 
+    beta(_beta), D(_D), V(_V), psi(_psi), f(_f), phiL(_phiL), phiR(_phiR),
+    alpha_l(_alpha_l), beta_l(_beta_l), alpha_r(_alpha_r), beta_r(_beta_r)
 {
-    L = _L; R = _R; T = _T;
-    alpha = _alpha; gamma = _gamma;
-    h = _h; tau = _tau; beta = _beta;
-    D = _D;
-    V = _V;
-    psi = _psi;
-    f = _f;
-    phiL = _phiL;
-    phiR = _phiR;
     n = (ull)((R - L) / h);
     k = (ull)(T / tau);
     result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
@@ -21,39 +20,11 @@ FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma
     memo_g_gamma[0] = 1.0;
 }
 
-FDESbase::FDESbase(double _L, double _R, double _T, double _alpha, double _gamma, double _h, double _tau, double _beta,
-    std::function<double(double, double)> _D, std::function<double(double, double)> _V, std::function<double(double)> _psi,
-    std::function<double(double, double)> _f) 
+FDESbase::FDESbase(const FDESbase& p) 
+: L(p.L), R(p.R), T(p.T), alpha(p.alpha), gamma(p.gamma), h(p.h), tau(p.tau), 
+beta(p.beta), D(p.D), V(p.V), psi(p.psi), f(p.f), phiL(p.phiL), phiR(p.phiR), 
+alpha_l(p.alpha_l), beta_l(p.beta_l), alpha_r(p.alpha_r), beta_r(p.beta_r), n(p.n), k(p.k)
 {
-    L = _L; R = _R; T = _T;
-    alpha = _alpha; gamma = _gamma;
-    h = _h; tau = _tau; beta = _beta;
-    D = _D;
-    V = _V;
-    psi = _psi;
-    f = _f;
-    phiL = [](double t){ return 0.0; };
-    phiR = [](double t){ return 0.0; };
-    n = (ull)((R - L) / h);
-    k = (ull)(T / tau);
-    result = std::vector<std::vector<double>>(k + 1, std::vector<double>(n + 1, 0.0));
-    memo_g_alpha[0] = 1.0;
-    memo_g_gamma[0] = 1.0;
-}
-
-FDESbase::FDESbase(const FDESbase& p)
-{
-    L = p.L; R = p.R; T = p.T;
-    alpha = p.alpha; gamma = p.gamma;
-    h = p.h; tau = p.tau; beta = p.beta;
-    D = p.D;
-    V = p.V;
-    psi = p.psi;
-    f = p.f;
-    phiL = p.phiL;
-    phiR = p.phiR;
-    n = p.n;
-    k = p.k;
     result = p.result;
     memo_g_alpha[0] = 1.0;
     memo_g_gamma[0] = 1.0;

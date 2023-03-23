@@ -18,6 +18,10 @@ protected:
     std::function<double(double, double)> V;    // коэффициент сноса при производной первой степени
     std::function<double(double)> psi;          // начальное условие при t = 0, u(x, 0) = psi(x)
     std::function<double(double, double)> f;    // функция источник
+
+    double alpha_l, beta_l; // коэффициенты граничных условий третьего рода для x == L
+    double alpha_r, beta_r; // коэффициенты граничных условий третьего рода для x == R
+
     std::function<double(double)> phiL;         // граничное условие u(L, t) = phiL(t)
     std::function<double(double)> phiR;         // граничное условие u(R, t) = phiR(t)
 
@@ -31,12 +35,10 @@ public:
     std::vector<std::vector<double>> result; // сетка с результатом моделирования/вычислений
 
     FDESbase(double, double, double, double, double, double, double, double,
-        std::function<double(double, double)>, std::function<double(double, double)>, std::function<double(double)>,
-        std::function<double(double, double)>, std::function<double(double)>, std::function<double(double)>);
-
-    FDESbase(double, double, double, double, double, double, double, double,
-        std::function<double(double, double)>, std::function<double(double, double)>, std::function<double(double)>,
-        std::function<double(double, double)>);
+        std::function<double(double, double)>, std::function<double(double, double)>, 
+        std::function<double(double)>, std::function<double(double, double)>, 
+        std::function<double(double)> = [](double t){ return 0.0; }, std::function<double(double)> = [](double t){ return 0.0; }, 
+        double = 0.0, double = 1.0, double = 0.0, double = 1.0);
 
     FDESbase(const FDESbase& p);
 
