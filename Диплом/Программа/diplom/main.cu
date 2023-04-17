@@ -52,41 +52,43 @@ int main() {
     //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
     //     [](double x, double t){ return 0.0; },                                  // f(x, t)
     //     [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); },                                            // phiL(t)
-    //     [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); }                                             // phiR(t)
+    //     [](double t){ return 0.1 * exp(-(0.01) / (4 * 0.0005 * t)) / sqrt(std::PI * 4 * 0.0005 * t); },                                             // phiR(t)
+    //     0.0,1.0,0.0,1.0,true
     // );
 
-    /* u(x, t) = ??? */ // alpha = 1.8, gamma = 1.0
+    /* u(x, t) = ??? */ // alpha = 1.7, gamma = 1.0
     // FDESbase p1(
-    //     -0.1, 0.1, 0.01, 1.8, 1.0, 0.001, 0.0001, 0.0,
+    //     -0.1, 0.1, 5.0, 1.7, 1.0, 0.005, 0.08, 0.0,
     //     [](double x, double t){ return 0.0005; },                                // D
     //     [](double x, double t){ return 0.0; },                                 // V
-    //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+    //     [](double x){ return -0.005 <= std::abs(x) && std::abs(x) < 0.0049999 ? 10.0 : 0.0; },     // psi(x)
     //     [](double x, double t){ return 0.0; },                                  // f(x, t)
     //     [](double t){ return 0.0; },                                            // phiL(t)
     //     [](double t){ return 0.0; }                                             // phiR(t)
     // );
 
-    /* u(x, t) = ??? */ // alpha = 2.0, gamma = 0.9
+    /* u(x, t) = ??? */ // alpha = 2.0, gamma = 0.7
     // FDESbase p1(
-    //     -0.1, 0.1, 5.0, 2.0, 0.9, 0.01, 0.05, 0.0,
-    //     [](double x, double t){ return 0.0005; },                                // D
-    //     [](double x, double t){ return 0.0; },                                 // V
-    //     [](double x){ return -0.01 <= std::abs(x) && std::abs(x) < 0.0099999 ? 10.0 : 0.0; },     // psi(x)
+    //     -0.1, 0.1, 5.0, 2.0, 0.8, 0.002, 0.001, 0.0,
+    //     [](double x){ return 0.0003; },                                // D
+    //     [](double x){ return 0.0; },                                 // V
+    //     [](double x){ return -0.002 <= std::abs(x) && std::abs(x) < 0.002 ? 1000.0 : 0.0; },     // psi(x)
     //     [](double x, double t){ return 0.0; },                                  // f(x, t)
     //     [](double t){ return 0.0; },                                            // phiL(t)
-    //     [](double t){ return 0.0; }                                             // phiR(t)
+    //     [](double t){ return 0.0; },                                             // phiR(t)
+    //     false
     // );
 
     /* u(x, t) = exp(2t) * sin(x) */ // alpha = 1.7, gamma = 0.8
     // FDESbase p1(
     //     -std::PI, std::PI, 1.0, 1.7, 0.8, 0.2, 0.005, 0.0,
-    //     [](double x, double t){ return std::pow(2.0, 0.8); },                                // D
-    //     [](double x, double t){ return 1.0; },                                // V
+    //     [](double x){ return std::pow(2.0, 0.8) / std::cos(0.7 / 4.0 * std::PI) / 2.0; },                                // D
+    //     [](double x){ return std::pow(2.0, 0.8) / std::cos(0.7 / 4.0 * std::PI) / 2.0; },                                // V
     //     [](double x){ return std::sin(x); },     // psi(x)
     //     [](double x, double t){ return -2.0 * std::pow(2.0, 0.8) * std::exp(2.0 * t) * 
-    //                             std::sin(1.7 / 4.0 * std::PI) * std::cos(x + 1.7 / 4.0 * std::PI); },                      // f(x, t)
+    //                             std::sin(2.7 / 8.0 * std::PI) * std::cos(x + 2.7 / 8.0 * std::PI); },                      // f(x, t)
     //     [](double t){ return 0.0; },                                            // phiL(t)
-    //     [](double t){ return 0.0; }                                             // phiR(t)
+    //     [](double t){ return 0.0; },true                                             // phiR(t)
     // );
 
     /* u(x, t) = t^2 */
@@ -101,48 +103,163 @@ int main() {
     // );
 
     /* u(x, t) = ??? */ // alpha = 1.7, gamma = 0.8
-    FDESbase p1(
-        0.0, 2.0, 1.0, 1.7, 0.8, 0.025, 0.005, 0.0,
-        [](double x, double t){ return 0.05; },                                // D
-        [](double x, double t){ return -0.2; },                                // V
-        [](double x){ return ill(x, 0.0, 1.0) ? 4.0 : (ila(x, 1.0, 2.0) ? 2.0 : 0.0); },     // psi(x)
-        [](double x, double t){ return 10.0*std::sin(x+4.0 * t); },                      // f(x, t)
-        [](double t){ return 1.0; },                                            // phiL(t)
-        [](double t){ return 1.0; },                                            // phiR(t)
-        0.0, 1.0, 0.0, 1.0
-    );
-
-    p1.Info();
-
-    MFDES solution1(p1);
-    MCFDES solution2(p1);
-
-    solution2.print_probs();
+    // FDESbase p1(
+    //     0.0, 2.0, 1.0, 1.7, 0.8, 0.025, 0.005, 0.0,
+    //     [](double x, double t){ return 0.05; },                                // D
+    //     [](double x, double t){ return -0.2; },                                // V
+    //     [](double x){ return ill(x, 0.0, 1.0) ? 4.0 : (ila(x, 1.0, 2.0) ? 2.0 : 0.0); },     // psi(x)
+    //     [](double x, double t){ return 10.0*std::sin(x+4.0 * t); },                      // f(x, t)
+    //     [](double t){ return 1.0; },                                            // phiL(t)
+    //     [](double t){ return 1.0; },                                            // phiR(t)
+    //     0.0, 1.0, 0.0, 1.0
+    // );
 
     std::chrono::time_point<std::chrono::system_clock> start_time, end_time;
 
-    start_time = std::chrono::system_clock::now();
-    solution1.solve();
-    end_time = std::chrono::system_clock::now();
+    // for (int n = 20; n < 300; n += 10) {
+    //     for (int K = 20; K < 400; K += 10) {
+            
+    //         FDESbase p1(
+    //             -0.5, 0.5, 1.0, 2.0, 0.8, 1.0 / (double)n, 1.0 / (double)K, 0.0,
+    //             [](double x){ return 0.0003; },                                // D
+    //             [](double x){ return 0.0; },                                 // V
+    //             [](double x){ return 0.5 - std::abs(x); },     // psi(x)
+    //             [](double x, double t){ return 0.0; },                                  // f(x, t)
+    //             [](double t){ return 0.0; },                                            // phiL(t)
+    //             [](double t){ return 0.0; },                                             // phiR(t)
+    //             false
+    //         );
 
-    std::cout << "MFDES (by matrix solver) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
 
-    start_time = std::chrono::system_clock::now();
-    solution2.solve_GPU(2000);
-    end_time = std::chrono::system_clock::now();
+    //         MFDES solution1(p1);
+    //         MCFDES solution2(p1);
 
-    std::cout << "MCFDES (by Monte-Carlo algo) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
+    //         double result[3] = {0.0};
+
+    //         start_time = std::chrono::system_clock::now();
+    //         solution1.solve();
+    //         end_time = std::chrono::system_clock::now();
+
+    //         result[0] = std::chrono::duration<double>(end_time - start_time).count();
+
+    //         start_time = std::chrono::system_clock::now();
+    //         solution2.solve(2);
+    //         end_time = std::chrono::system_clock::now();    
+
+    //         result[1] = std::chrono::duration<double>(end_time - start_time).count();
+
+    //         start_time = std::chrono::system_clock::now();
+    //         solution2.solve_GPU(5);
+    //         end_time = std::chrono::system_clock::now();
+
+    //         result[2] = std::chrono::duration<double>(end_time - start_time).count();
+
+    //         std::cout << n << " " << K << " ";
+    //         for (int i = 0; i < 3; i++) {
+    //             std::cout << result[i] << " ";
+    //         }
+    //         std::cout << std::endl;
+
+    //         std::fstream file;
+    //         file.open("out_stat.txt", std::ios_base::app);
+
+    //         file << n << " " << K << " ";
+    //         for (int i = 0; i < 3; i++) {
+    //             file << result[i] << " ";
+    //         }
+    //         file << std::endl;
+
+    //         file.close();
+            
+    //     }
+    // }
+    int n = 200;
+
+    for (double K = 10; K < 700; K *= 1.3) {
+        
+        FDESbase p1(
+            -0.5, 0.5, 1.0, 2.0, 0.8, 1.0 / (double)n, 1.0 / K, 0.0,
+            [](double x){ return 0.0003; },                                // D
+            [](double x){ return 0.0; },                                 // V
+            [](double x){ return 0.5 - std::abs(x); },     // psi(x)
+            [](double x, double t){ return 0.0; },                                  // f(x, t)
+            [](double t){ return 0.0; },                                            // phiL(t)
+            [](double t){ return 0.0; },                                             // phiR(t)
+            false
+        );
+
+
+        MFDES solution1(p1);
+        MCFDES solution2(p1);
+
+        double result[3] = {0.0};
+
+        start_time = std::chrono::system_clock::now();
+        solution1.solve();
+        end_time = std::chrono::system_clock::now();
+
+        result[0] = std::chrono::duration<double>(end_time - start_time).count();
+
+        start_time = std::chrono::system_clock::now();
+        solution2.solve(100);
+        end_time = std::chrono::system_clock::now();    
+
+        result[1] = std::chrono::duration<double>(end_time - start_time).count();
+
+        start_time = std::chrono::system_clock::now();
+        solution2.solve_GPU(5);
+        end_time = std::chrono::system_clock::now();
+
+        result[2] = std::chrono::duration<double>(end_time - start_time).count();
+
+        std::cout << n << " " << K << " ";
+        for (int i = 0; i < 3; i++) {
+            std::cout << result[i] << " ";
+        }
+        std::cout << std::endl;
+
+        std::fstream file;
+        file.open("out_stat_t.txt", std::ios_base::app);
+
+        file << n << " " << K << " ";
+        for (int i = 0; i < 3; i++) {
+            file << result[i] << " ";
+        }
+        file << std::endl;
+
+        file.close();
+        
+    }
+
+    // MFDES solution1(p1);
+    // MCFDES solution2(p1);
+
+    // solution2.print_probs();
+
+    // std::chrono::time_point<std::chrono::system_clock> start_time, end_time;
+
+    // start_time = std::chrono::system_clock::now();
+    // solution1.solve();
+    // end_time = std::chrono::system_clock::now();
+
+    // std::cout << "MFDES (by matrix solver) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
+
+    // start_time = std::chrono::system_clock::now();
+    // solution2.solve_GPU(30000);
+    // end_time = std::chrono::system_clock::now();
+
+    // std::cout << "MCFDES (by Monte-Carlo algo) time: " << std::chrono::duration<double>(end_time - start_time).count() << std::endl;
 
     /* FILE WRITING */
 
-    std::fstream file;
-    file.open("out.txt", std::ios_base::out);
+    // std::fstream file;
+    // file.open("out.txt", std::ios_base::out);
 
-    file << solution1 << std::endl;
+    // file << solution1 << std::endl;
 
-    file << solution2 << std::endl;
+    // file << solution1 << std::endl;
 
-    file.close();
+    // file.close();
     
     return 0;
 }

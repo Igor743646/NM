@@ -41,11 +41,12 @@ def decision(x, t):
     # res[0] = 10.0 * (np.abs(x[0]) < np.array([h1] * len(x[0])))
     return res
 
-# decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
+decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
 # decision = lambda x,t : (x * x) * np.exp(2*t)
-decision = lambda x,t : (x * x) * t * t
+# decision = lambda x,t : (x * x) * t * t
 # decision = lambda x,t : t * t
 # decision = lambda x, t: np.zeros_like(x)
+# decision = None
 
 def draw(res, rows, decision = None):
 
@@ -108,10 +109,9 @@ def delta12(res1, res2, f):
     
 
 # draw([result1], 6, decision)
-def f(x, t):
-    return 10.0 * np.sin(x+4.0*t) / 10.0
-# plot3D(result1, decision)
-# plot3D(result2, decision)
-delta12(result1, result2, f)
+
+plot3D(result1, decision)
+plot3D(result2, decision)
+# delta12(result1, result2, f)
 
 plt.show()

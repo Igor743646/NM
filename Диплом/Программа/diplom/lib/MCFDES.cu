@@ -13,16 +13,6 @@
 
 MCFDES::MCFDES(const FDESbase& _p) : FDESbase(_p) {
     probabilities = _make_prob();
-
-    if (alpha_l * beta_l >= 0) {
-        Output::print("ERROR: May be problem with conditions: alpha_l * beta_l = ", alpha_l * beta_l , ">= 0");
-        // throw "ERROR: wrong border condition (L)";
-    }
-
-    if (alpha_r * beta_r <= 0) {
-        Output::print("ERROR: May be problem with conditions: alpha_r * beta_r = ", alpha_r * beta_r , "<= 0");
-        // throw "ERROR: wrong border condition (R)";
-    }
 }
 
 void MCFDES::solve(ull count = DEFAULT_COUNT) {
@@ -67,12 +57,14 @@ void MCFDES::solve(ull count = DEFAULT_COUNT) {
                     }
                 }
 
-                if (y == 0) {
+                if (y <= 0 && (x >= 0) && (x <= n)) {
                     result[j][i] += psi(x_i(x));
-                } else if (x == 0) {
-                    result[j][i] += phiL(t_k(y));
-                } else if (x == n) {
-                    result[j][i] += phiR(t_k(y));
+                } else if (is_borders) {
+                    if (x == 0 && y > 0) {
+                        result[j][i] += phiL(t_k(y));
+                    } else if (x == n && y > 0) {
+                        result[j][i] += phiR(t_k(y));
+                    }
                 }
             }
 
@@ -155,7 +147,7 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
     CSC(cudaGetLastError());
 
     solve_kernel<<<TBLOCKS, THREADS>>>(dev_states, result_gpu, prefsum_prob_gpu, n, k, count, L, h, tau, 
-                                        gamma, borders_gpu, source_gpu, alpha_l, beta_l, alpha_r, beta_r);
+                                        gamma, borders_gpu, source_gpu, alpha_l, beta_l, alpha_r, beta_r, is_borders);
     CSC(cudaGetLastError());
 
     double* result_cpu = new double[grid_size];
@@ -180,7 +172,7 @@ void MCFDES::solve_GPU(ull count = DEFAULT_COUNT) {
 std::vector<double> MCFDES::_make_prob() {
     std::vector<double> probabilities(2 * n + 2 + k , 0.0);
 
-    double a00 = a(0.0, 0.0), b00 = b(0.0, 0.0), c00 = c(0.0, 0.0); // Только для D = const
+    double a00 = a(0.0), b00 = b(0.0), c00 = c(0.0); // Только для D = const
 
     probabilities[n - 1] = a00 + b00 * g(alpha, 2.0) - c00;
     probabilities[n] = gamma - alpha * (a00 + b00);

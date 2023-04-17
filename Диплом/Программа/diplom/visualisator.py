@@ -34,13 +34,13 @@ file.close()
 
 # L = -0.1
 
-sig2 = lambda t : 4 * 0.0005 * t
+sig2 = lambda t : 4 * 0.0003 * t
 
 def decision(x, t):
-    return 0.1 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (10.0 * (np.abs(x) < np.array([h1] * len(x))) )
+    return 2.4 * np.exp(-(x)**2 / sig2(t)) / np.sqrt(math.pi * sig2(t)) if t[0] > 0.0 else (10.0 * (np.abs(x) < np.array([h1] * len(x))) )
 
 # decision = lambda x,t : (np.sin(x)) * np.exp(2*t)
-decision = lambda x,t : (x * x) * t * t
+# decision = lambda x,t : (x * x) * t * t
 # decision = lambda x,t : (x * x) * np.exp(2*t)
 # decision = lambda x,t : t * t
 # decision = None
@@ -73,7 +73,33 @@ def draw(res, rows, decision = None):
         ax[kk // colums, kk % colums].plot(X2, res[1][kk*step], '.-', linewidth = 1)
         ax[kk // colums, kk % colums].set_title(f"{kk*step} (t = {tau1*kk*step})")
 
+def draw_split(res, snaps, decision = None):
+    fig, ax = plt.subplots(1, 1, figsize=(16, 10))
+
+    X_decision = np.linspace(L1, L1 + h1 * len(res[0][0]), 200)
+    X1 = np.array([L1 + h1*i for i in range(len(res[0][0]))])
+    X2 = np.array([L2 + h2*i for i in range(len(res[1][0]))])
+    
+    for kk in snaps:
+        if not decision == None:
+            TIME_decision = np.array([tau1*kk] * len(X_decision))
+            ax.plot(X_decision, decision(X_decision, TIME_decision), label = 'Диффузия')
+
+        ax.plot(X1, res[0][kk], '.-', linewidth = 1, color = 'blue')
+        ax.plot(X2, res[1][kk], '.-', linewidth = 1, color='orange', label='Субдиффузия')
+    
+    ax.set_title(f"{snaps} (t = {tuple(tau1 * i for i in snaps)})")
+    plt.legend()
+
+
+
 # draw([result1, result2], int(number_of_strings) // 4, decision)
-draw([result1, result2], 5, decision)
+# draw([result1, result2], 5, decision)
+
+print(np.sum(np.array(result1), 1))
+
+draw_split([result1, result2], (100,), decision)
+draw_split([result1, result2], (1000,), decision)
+draw_split([result1, result2], (2000,), decision)
 
 plt.show()

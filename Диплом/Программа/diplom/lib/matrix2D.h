@@ -12,6 +12,8 @@ struct Matrix {
     ull n;
     double** matrix;
 
+    Matrix* mem_plu = nullptr; 
+
     Matrix(ull _n) {
         n = _n;
         matrix = new double* [n];
@@ -21,6 +23,9 @@ struct Matrix {
     }
 
     ~Matrix() {
+        if (mem_plu != nullptr) {
+            delete[] mem_plu;
+        }
         for (ull i = 0; i < n; i++) {
             delete[] matrix[i];
         }
@@ -134,6 +139,10 @@ struct Matrix {
         // std::cout << L << std::endl;
         // std::cout << U << std::endl << std::endl;
 
+        if (mem_plu == nullptr) {
+            mem_plu = new Matrix[3]{P, L, U};
+        }
+
         return std::vector<Matrix>({ P, L, U });
     }
 
@@ -145,7 +154,11 @@ struct Matrix {
         }
 
         // 1. Делаем LU - разложение
-        auto plu = LUFactorizing();
+        std::vector<Matrix> plu;
+        if (mem_plu == nullptr)
+            plu = LUFactorizing();
+        else 
+            plu = std::vector<Matrix>({mem_plu[0], mem_plu[1], mem_plu[2]});
 
         // 2. Вычисляем P^(T) * b = b * P = y
         auto y = b * plu[0];

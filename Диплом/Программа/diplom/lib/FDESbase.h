@@ -14,14 +14,15 @@ protected:
     double h, tau;          // шаги по сетки по x и t координатах соответственно
     double beta;            // коэффициент доли лево/правосторонней производных [-1; +1]
 
-    std::function<double(double, double)> D;    // коэффициент диффузии при дробной производной по пространству
-    std::function<double(double, double)> V;    // коэффициент сноса при производной первой степени
+    std::function<double(double)> D;    // коэффициент диффузии при дробной производной по пространству
+    std::function<double(double)> V;    // коэффициент сноса при производной первой степени
     std::function<double(double)> psi;          // начальное условие при t = 0, u(x, 0) = psi(x)
     std::function<double(double, double)> f;    // функция источник
 
     double alpha_l, beta_l; // коэффициенты граничных условий третьего рода для x == L
     double alpha_r, beta_r; // коэффициенты граничных условий третьего рода для x == R
 
+    bool is_borders;                            // стоит ли учитывать граничные условия
     std::function<double(double)> phiL;         // граничное условие u(L, t) = phiL(t)
     std::function<double(double)> phiR;         // граничное условие u(R, t) = phiR(t)
 
@@ -35,10 +36,9 @@ public:
     std::vector<std::vector<double>> result; // сетка с результатом моделирования/вычислений
 
     FDESbase(double, double, double, double, double, double, double, double,
-        std::function<double(double, double)>, std::function<double(double, double)>, 
+        std::function<double(double)>, std::function<double(double)>, 
         std::function<double(double)>, std::function<double(double, double)>, 
-        std::function<double(double)> = [](double t){ return 0.0; }, std::function<double(double)> = [](double t){ return 0.0; }, 
-        double = 0.0, double = 1.0, double = 0.0, double = 1.0);
+        std::function<double(double)> = [](double t){ return 0.0; }, std::function<double(double)> = [](double t){ return 0.0; }, bool = false);
 
     FDESbase(const FDESbase& p);
 
@@ -49,9 +49,9 @@ public:
     double x_i(ull);
     double t_k(ull);
 
-    double a(double, double);
-    double b(double, double);
-    double c(double, double);
+    double a(double);
+    double b(double);
+    double c(double);
 
     friend std::ostream& operator<<(std::ostream&, const FDESbase&);
 

@@ -49,7 +49,7 @@ __device__ ull bin_search_gpu(const double* v, double k, size_t sz) {
 __global__ void solve_kernel(curandState* state, double* result, double* prefsum_prob_gpu,
     ull n, ull k, ull count,
     double L, double h, double tau, double gamma, double* borders_gpu, double* source_gpu,
-    double alpha_l, double beta_l, double alpha_r, double beta_r
+    double alpha_l, double beta_l, double alpha_r, double beta_r, bool is_borders
 ) {
     int idx = threadIdx.x + blockIdx.x * blockDim.x;
     int offset = gridDim.x * blockDim.x;
@@ -60,38 +60,20 @@ __global__ void solve_kernel(curandState* state, double* result, double* prefsum
     double p1_r = alpha_r / (alpha_r + beta_r * h);
 
     while (idx < (n + 1) * k) {
+        
+        double result_idx = 0.0;
 
         for (ull _i = 0; _i < count; _i++) {
             long long y = (idx / (n + 1)) + 1;
             long long x = idx % (n + 1);
 
-            if (x == 0) {
-                double rnd1 = curand_uniform_double(&localState);
-                if (rnd1 <= p1_l) { // если частица отразилась
-                    // result[idx] += source_gpu[(y - 1) * (n + 1) + x] ;
-                    x++; 
-                } else { // если частица поглотилась
-                    result[idx] += borders_gpu[n + 1 + y] / beta_l; 
-                    continue;
-                }
-            } else if (x == n) {
-                double rnd1 = curand_uniform_double(&localState);
-                if (rnd1 <= p1_r) { // если частица отразилась
-                    // result[idx] += source_gpu[(y - 1) * (n + 1) + x] / (beta_l + alpha_l / h) * h;
-                    x--;
-                } else { // если частица поглотилась
-                    result[idx] += borders_gpu[n + 1 + k + y] / beta_r; 
-                    continue;
-                }
-            }
-
-            while (y > 0) {
+            while ((y > 0 && x > 0 && x < n && is_borders) || (y > 0 && !is_borders)) {
                 double rnd = curand_uniform_double(&localState);
                 long long idy = 0;
 
                 idy = (long long)bin_search_gpu(prefsum_prob_gpu, rnd, 2*n+k+2);
 
-                result[idx] += source_gpu[(y - 1) * (n + 1) + x] * pow(tau, gamma);
+                result_idx += source_gpu[(y - 1) * (n + 1) + x] * pow(tau, gamma);
 
                 if (idy <= 2 * n) { // перемещение по пространству
                     x += idy - n;
@@ -101,51 +83,20 @@ __global__ void solve_kernel(curandState* state, double* result, double* prefsum
                 } else {
                     break;
                 }
-
-                if (y == 0 && (x >= 0) && (x <= n)) {
-                    result[idx] += borders_gpu[x];
-                    break;
-                } else if (y == 0) {
-                    break;
-                }
-
-                if (x == 0) {
-                    double rnd1 = curand_uniform_double(&localState);
-                    if (rnd1 <= p1_l) { // если частица отразилась
-                        // result[idx] += source_gpu[(y - 1) * (n + 1) + x] * pow(tau, gamma);
-                        x++; 
-                    } else { // если частица поглотилась
-                        result[idx] += borders_gpu[n + 1 + y] / beta_l; 
-                        break;
-                    }
-                } else if (x == n) {
-                    double rnd1 = curand_uniform_double(&localState);
-                    if (rnd1 <= p1_r) { // если частица отразилась
-                        // result[idx] += source_gpu[(y - 1) * (n + 1) + x] / (beta_l + alpha_l / h) * h;
-                        x--;
-                    } else { // если частица поглотилась
-                        result[idx] += borders_gpu[n + 1 + k + y] / beta_r; 
-                        break;
-                    }
-                }
             }
             
-            // if (y == 0 && (x >= 0) && (x <= n)) { // если частица дошла до начального момента времени
-            //     result[idx] += borders_gpu[x];
-            // } else if (x == 0 && y > 0) { // если частица попала на левую границу
-            //     double rnd = curand_uniform_double(&localState);
-
-            //     if (rnd < p1_l) { // если частица отразилась
-
-            //     } else {
-
-            //     }
-            //     result[idx] += borders_gpu[n + 1 + y];
-            // } else if (x == n && y > 0) {
-            //     result[idx] += borders_gpu[n + 1 + k + y];
-            // }
+            if (y <= 0 && (x >= 0) && (x <= n)) { // если частица дошла до начального момента времени
+                result_idx += borders_gpu[x];
+            } else if (is_borders) {
+                if (x == 0 && y > 0) { // если частица попала на левую границу
+                    result_idx += borders_gpu[n + 1 + y];
+                } else if (x == n && y > 0) {
+                    result_idx += borders_gpu[n + 1 + k + y];
+                }
+            }
         }
         
+        result[idx] += result_idx;
         result[idx] /= (double)count;
         
         idx += offset;
